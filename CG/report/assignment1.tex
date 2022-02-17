@@ -1,0 +1,70 @@
+\input{style-report}
+\input{math-command}
+\title{Computer Graphics Assignment \#1}
+\begin{document}
+
+\section{Question}
+Answer the inverse Fourier transform of the functions:
+$$
+\begin{gathered}
+    \func[F][][1](\omega_x,\omega_y) = \func[\delta](\omega_x - \sqrt{3})\func[\delta](\omega_y - 1) + \func[\delta](\omega_x + \sqrt{3})\func[\delta](\omega_y + 1) \\
+    \func[F][][2](\omega_x,\omega_y) = i\func[\delta](\omega_x - \sqrt{3})\func[\delta](\omega_y - 1) - i\func[\delta](\omega_x + \sqrt{3})\func[\delta](\omega_y + 1)
+\end{gathered}
+$$
+
+\section{Answer}
+\subsection{Equation}
+\subsubsection{Inverse Fourier transform of $\func[F][][1]$}
+
+\begin{align}
+\invfourier{\func[F][][1](\omega_x,\omega_y)} 
+&= \invfourier{\func[\delta](\omega_x - \sqrt{3})\func[\delta](\omega_y - 1) + \func[\delta](\omega_x + \sqrt{3})\func[\delta](\omega_y + 1)} \\
+&= \invfourier{\func[\delta](\omega_x - \sqrt{3})\func[\delta](\omega_y - 1)} + \invfourier{\func[\delta](\omega_x + \sqrt{3})\func[\delta](\omega_y + 1)}
+\end{align}
+By applying the property of the dirac delta function $\sint[-\infty][\infty] \func[f](x)\func[\delta](x - x_0) \dx = \func[f](x_0)$, we have
+\begin{align}
+\invfourier{\func[\delta](\omega_x - \sqrt{3})\func[\delta](\omega_y - 1)}
+&= \frac{1}{4\pi^2} \sint[-\infty][\infty]  \func[\delta](\omega_y - 1) e^{i\omega_y y} \sint[-\infty][\infty] \func[\delta](\omega_x - \sqrt{3}) e^{i\omega_x x} \domega_x  \domega_y \\
+&= \frac{1}{4\pi^2} \sint[-\infty][\infty]  \func[\delta](\omega_y - 1) e^{i\omega_y y} \parens*{e^{\sqrt{3} ix}}  \domega_y \\
+&= \frac{1}{4\pi^2} \parens*{e^{\sqrt{3} ix}} \parens*{e^{iy}} \label{first-term}
+\end{align}
+and similarly,
+\begin{equation}
+    \invfourier{\func[\delta](\omega_x + \sqrt{3})\func[\delta](\omega_y + 1)} = \frac{1}{4\pi^2} \parens*{e^{-\sqrt{3} ix}} \parens*{e^{-iy}} \label{second-term}
+\end{equation}
+Therefore, by combining result from \eqref{first-term} and \eqref{second-term} and applying the Euler's formula, we have
+\begin{align}
+\invfourier{\func[F][][1](\omega_x,\omega_y)} 
+&= \frac{1}{4\pi^2} \parens*{{e^{\sqrt{3} ix + iy}} + {e^{-\sqrt{3} ix - iy}}} \label{combine} \\
+&= \frac{1}{4\pi^2} \parens*{\cos(\sqrt{3}x + y) + i\sin(\sqrt{3}x + y) + \cos(-\sqrt{3}x - y) + i\sin(-\sqrt{3}x - y)} \\
+&= \frac{1}{4\pi^2} \parens*{\cos(\sqrt{3}x + y) + i\sin(\sqrt{3}x + y) + \cos(\sqrt{3}x + y) - i\sin(\sqrt{3}x + y)} \\
+&= \frac{1}{2\pi^2} \cos(\sqrt{3}x + y) \label{result-1}
+\end{align}
+
+\subsubsection{Inverse Fourier transform of $\func[F][][2]$}
+
+Since $\func[F][][1]$ and $\func[F][][2]$ are the same, except the coefficient $i$ and the minus sign in the latter, we can modify the expression in \eqref{combine}:
+\begin{align}
+\invfourier{\func[F][][2](\omega_x,\omega_y)} 
+&= \frac{i}{4\pi^2} \parens*{{e^{\sqrt{3} ix + iy}} - {e^{-\sqrt{3} ix - iy}}} \\
+&= \frac{i}{4\pi^2} \parens*{\cos(\sqrt{3}x + y) + i\sin(\sqrt{3}x + y) - \cos(-\sqrt{3}x - y) - i\sin(-\sqrt{3}x - y)} \\
+&= \frac{i}{4\pi^2} \parens*{\cos(\sqrt{3}x + y) + i\sin(\sqrt{3}x + y) - \cos(\sqrt{3}x + y) + i\sin(\sqrt{3}x + y)} \\
+&= -\frac{1}{2\pi^2} \sin(\sqrt{3}x + y) \label{result-2}
+\end{align}
+
+\subsection{Graph}
+We can visualize the inverse Fourier transform of $\func[F][][1]$ and $\func[F][][2]$, described in \eqref{result-1} and \eqref{result-2}, by using Python.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/assignment1/cg1-assignment1.png}
+    \caption{Visualization of $\invfourier{\func[F][][1](\omega_x,\omega_y)}$ and $\invfourier{\func[F][][2](\omega_x,\omega_y)}$}
+\end{figure}
+
+\subsection{Text (Full sentences)}
+\begin{itemize}
+    \item $\invfourier{\func[F][][1](\omega_x,\omega_y)}$ is a cosine function with an amplitude of $\frac{1}{2\pi}$ in the direction of 30 degrees from $x$-axis. Its period is $\parens*{\frac{2\pi}{\sqrt{3}}, 2\pi}$.
+    \item Similarly, $\invfourier{\func[F][][2](\omega_x,\omega_y)}$ is a sine function with an amplitude of $\frac{1}{2\pi}$ in the direction of 30 degrees from $x$-axis. Its period is $\parens*{\frac{2\pi}{\sqrt{3}}, 2\pi}$. It is also reflected over the unit vector $\parens*{\sqrt{3}, 1}$.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,43 @@
+\input{style-report}
+\input{math-command}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{tikz}
+\title{Computer Graphics Assignment \#2}
+\begin{document}
+\section{Question}
+\begin{enumerate}
+    \item Draw the Fourier transform of a 2 Dimensional sampling function, whose intervals along with $x$ and $y$ axes are $\pi$, on a graph as shown in Fig. \ref{frequency-sampling}.
+    \item Using the graph, explain the characteristics of the waves, which have the highest frequency in the range of aliasing free.
+\end{enumerate}
+
+\section{Answer}
+
+\subsection{Fourier transform of 2-Dimensional Sampling Function}
+From the Fourier series of 1-dimensional sampling function, we have
+\begin{align}
+\ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] \func[\delta](x-nT,y-mT)
+&= \parens*{\ssum[n][-\infty][\infty] \func[\delta](x-nT)} \parens*{\ssum[m][-\infty][\infty] \func[\delta](y-mT)} \\
+&= \parens*{\frac{1}{T}\ssum[n][-\infty][\infty] e^{in\omega_{x0}x}} \parens*{\frac{1}{T}\ssum[m][-\infty][\infty] e^{im\omega_{y0}y}} \\
+&= \frac{1}{T^2} \ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] e^{in\omega_{x0}x} e^{im\omega_{y0}y}
+\end{align}
+Hence, similar to the Fourier transform of 1-dimensional sampling function, we have
+\begin{align}
+\fourier{\func[\delta][][T](x,y)}
+&= \fourier{\ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] \func[\delta](x-nT,y-mT)} \\
+&= \ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] \sint[-\infty][\infty] \sint[-\infty][\infty] \frac{1}{T^2} e^{in\omega_{x0}x} e^{im\omega_{y0}y} e^{-iw_x x} e^{-iw_y y} \dx \dy \\
+&= \frac{1}{T^2} \ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] e^{-i(\omega_x - n\omega_{x0})x} e^{-i(\omega_y - m\omega_{y0})y} \\
+&= \frac{1}{T^2} \ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] \func[\delta](\omega_x - n\omega_{x0},\omega_y - m\omega_{y0})
+\end{align}
+Since the intervals along $x$ and $y$ axes are $\pi$, i.e. $\omega_{x0} = \omega={y0} = \pi$, we have
+\begin{equation}
+\func[\delta][][\pi](\omega_x,\omega_y) = \frac{1}{T^2} \ssum[n][-\infty][\infty] \ssum[m][-\infty][\infty] \func[\delta](\omega_x - n\pi,\omega_y - m\pi) \label{solution}
+\end{equation}
+
+We can plot the equation \eqref{solution} in the $xy$-coordinate as shown in Figure \ref{frequency-sampling}. Note that each red point indicate a value of $\frac{1}{T^2}$.
+\subfile{./figures/assignment2/graph}
+
+\subsection{Characteristics of Waves}
+For a signal $f(x,y)$, we have $\func[f](x,y)\func[\delta][][T](x,y) = \func[F](\omega_x,\omega_y) \ast \func[\delta][][\omega](\omega_x,\omega_y)$. Now, assuming that the shape of $\func[F](\omega_x,\omega_y)$ a bivariate guassian distribution with variance $\sigma_{\omega_x} = f_x$ and $\sigma_{\omega_y} = f_y$ (for the purpose of visualization), the convolution creates many copies of that shape, centered at each blue point, as illustrated in \ref{frequency-sampling-2}. If two circles overlap each other, aliasing will occur, making it impossible to recover the original signal. Therefore, recoverable waves must have the highest frequency in the range of aliasing free; that is, $f_x < \frac{\pi}{2}$ and $f_y < \frac{\pi}{2}$. Note that this intuition concurs with the sampling theorem.
+
+\end{document}

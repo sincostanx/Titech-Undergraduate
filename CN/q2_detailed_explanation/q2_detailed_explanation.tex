@@ -1,0 +1,30 @@
+\input{style-report}
+\input{math-command}
+\title{Quiz \#2: Supplementary Document}
+\begin{document}
+\section{Question \#1}
+Let $\val[G]=(\val[V],\val[E])$ and $\val[A]$ be an undirected graph and an adjacency matrix associated with $\val[G]$, respectively. Since there exists a walk\footnote{Here, I refer to \tit{walk} instead of \tit{path} because nodes and edges may be repeated in this manner of calculation.} of length $k$ between node $i$ and $j$ if and only if $\val[A][][ij]^k = 1$, one might be tempted to conclude that the number of triangles, i.e. cycle of length $3$, in the graph is $\Tr\parens*{\val[A]^k}$. However, it is, in fact, false because each cycle is counted 6 times instead of only once. Mathematically, let $e_1, e_2, e_3 \in \val[E]$ be edges in a triangle, every permutation of $\{e_1,e_2,e_3\}$ is equivalent. Therefore, we need to account for it by multiplying $1/6$:
+\begin{equation}
+    \text{\#triangle} = \frac{1}{6} \Tr\parens*{\val[A]^k}
+\end{equation}
+
+Incidentally, this formula cannot be generalized for cycles of length $n>3$ because a cycle is defined as a trail, i.e. walk without repeated edges, in which only the first and last nodes are the same. It is only true for triangles because all closed walks of length $3$ must be a trail. That is, given that $u,A,B,u$ as a sequence of visited nodes, $A$ and $B$ can neither be node $u$ nor the same node because $\val[G]$ contains no self-loop. Therefore, all nodes are unique, implying that all edges are unique since $\val[G]$ is not a multigraph.
+
+\section{Question \#2}
+Suppose that $\val[G]=(\val[V],\val[E])$ is an undirected graph without self-loops and multiedges, we can verify that nodes $u,v,w \in \val[V]$ form a triangle if it is a 3-clique. Therefore, $\val[G]$ contains the maximum possible number of triangle if all combinations of $u,v,w \in \val[V]$ form $K_3$
+\begin{equation}
+    \text{\#max\_triangle} = \genfrac(){0pt}{0}{\abs{\val[V]}}{3}
+\end{equation}
+
+\section{Question \#3}
+According to Turan's theorem, a graph $\val[G]=(\val[V],\val[E])$ without a $(k+1)$-clique must satisfy the inequality
+\begin{equation}
+    \abs{E} \leq \frac{(k-1)\abs{V}^2}{2k}
+\end{equation}
+For $k=2$, graph with $\floor*{\frac{(k-1)\abs{V}^2}{2k}}$ edges is a complete bipartite graph such that the two sets of nodes have as equal size as possible. Therefore, we generate a graph of $n = 9$ nodes and 12 edges that contains no triangles by:
+\begin{enumerate}
+    \item Divide nodes into 2 groups, $S_1 = \cbracket{1,\ldots,\floor{n/2}}$ and $S_2 = \cbracket{\ceil{n/2},\ldots,n}$.
+    \item Add an edge between a pair of nodes $(u,v)$ where $u \in S_1$ and $v \in S_2$ until we cannot do it anymore or $\abs{E} = m$.
+\end{enumerate}
+
+\end{document}

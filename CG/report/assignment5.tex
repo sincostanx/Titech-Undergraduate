@@ -1,0 +1,138 @@
+\input{style-report}
+\input{math-command}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{hyperref}
+
+\title{Computer Graphics Assignment \#5}
+\begin{document}
+\section{Question}
+\begin{enumerate}
+    \item The graphs in Figure \ref{assignment5-problem1} are pigment spectral reflectances. Calculate the CIEXYZ1931 coordinate of the reflection of those pigments with D65 incident light. You can assume that the reflectance values at less than 400nm are equal to the value at 400nm and the reflectance values at greater than 700nm are equal to the value at 700nm, and approximate the spectrum of the D65 light as black-body radiation at 6504K. The color matching functions for CIEXYZ1931 shown in Figure \ref{assignment5-problem2} is XYZ\_CIE\_2.dat.
+    \item Calculate the color coordinate of the reflection of pigments in sRGB(8bits) color space, where the reflection of a surface, whose reflectance at any wavelength is 100%, with a D65 incident light is (255,255,255).
+    \item Answer the numbers of the brightest and darkest pigments in the D65 illumination condition.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \hspace*{\fill}
+    \subcaptionbox{Pigment Reflectances \label{assignment5-problem1}}{\includegraphics[width=0.45\textwidth]{figures/assignment5/assignment5-problem1.png}}%
+    \hspace*{\fill}
+    \subcaptionbox{CIEXYZ1931 Standard Observer Color Matching Functions \label{assignment5-problem2}}{\includegraphics[width=0.5\textwidth]{figures/assignment5/assignment5-problem2.png}}%
+    \hspace*{\fill}
+    \caption{Given data}
+\end{figure}
+
+\section{Answer}
+
+This report describes only procedures and results. Please refer to \href{https://colab.research.google.com/drive/1KD-4itGSez7aZ8Xvt2FDbf4bOZyQURiZ?usp=sharing}{\underline{this Python imeplementation}} for detailed numerical calculations. Although I have already verified that we can access this link, please contact me if you could not access it for some reason when grading this assignment.
+
+\subsection{XYZ Coordinate System}
+
+\subsubsection{General Procedure}
+Let $S(\lambda)$ and $I(\lambda)$ denote reflectance of pigment and relative spectral power at wavelength $\lambda$, respectively. We can define reflection at each $\text{Ref}(\lambda)$ as
+
+\begin{equation}
+    \text{Ref}(\lambda) = S(\lambda)I(\lambda)
+\end{equation}
+
+By using CIEXYZ1931 matching functions, we can calculate the CIEXYZ1931 coordinate of the reflection of those pigments with a D65 incident light as
+
+\begin{subequations}
+    \begin{gather}
+        X = \frac{1}{N}\int_{380}^{780} \text{Ref}(\lambda) \bar{x}(\lambda) ~d\lambda \approx \frac{1}{N}\sum_{380}^{780} \text{Ref}(\lambda) \bar{x}(\lambda)\\
+        Y = \frac{1}{N}\int_{380}^{780} \text{Ref}(\lambda) \bar{y}(\lambda) ~d\lambda \approx \frac{1}{N}\sum_{380}^{780} \text{Ref}(\lambda) \bar{y}(\lambda)\\
+        Z = \frac{1}{N}\int_{380}^{780} \text{Ref}(\lambda) \bar{z}(\lambda) ~d\lambda \approx \frac{1}{N}\sum_{380}^{780} \text{Ref}(\lambda) \bar{z}(\lambda)\\
+        N = \int_{380}^{780} I(\lambda) \bar{y}(\lambda) ~d\lambda \approx \sum_{380}^{780} I(\lambda) \bar{y}(\lambda)
+    \end{gather}
+\end{subequations}
+where $\bar{x}(\lambda)$, $\bar{y}(\lambda)$, and $\bar{z}(\lambda)$ are the values of matching functions for $X$, $Y$, and $Z$ at wavelength $\lambda$, respectively \cite{assignment5-xyz-wikipedia}. After performing these calculations, XYZ coordinate for each pigment is given in Figure \ref{assignment5-xyz}.
+
+\subsubsection{Implementation Detail}
+
+Although the general procedure is straightforward, reflectance data require some preparation because they are not measured at the same wavelengths as CIEXYZ1931 matching functions. Specifically, we perform the following steps:
+\begin{enumerate}
+    \item Since a pigment's reflectance is measured at 400 nm, reflectance values at less than 400 nm is equal to the value at 400 nm.
+    \item Reflectance values in the range 400 to 700 are approximated as a linear interpolation of two closest values. Note that since the data point with maximum wavelength locates at less than 700 nm, the value at 700 nm is extrapolated.
+    \item Following the given instruction, reflectance values at greater than 700 nm are equal to the value at 700 nm. 
+\end{enumerate}
+
+Another issue is the lack of relative spectrum power of D65 incident light. Consequently, we will approximate the spectrum of the D65 light as black-body radiation at 6504K, which is given by
+
+\begin{equation}
+L_e(\lambda) = \frac{2c^2h}{\lambda^5(e^{hc / kT\lambda} - 1)}
+\end{equation}
+where $h = 6.6260755 \times 10^{-34}$, $c = 2.99792458 \times 10^8$, $k = 1.380658 \times 10^{-23}$ at $T = 6504$ for $\lambda \in [380,780]$. Note that the illustration for interpolated reflectance values of pigments and relative spectrum power (to wavelength at 560 nm) are shown in Figure \ref{assignment5-pigment} and \ref{assignment5-spectrum}, respectively.
+
+\begin{figure}[h]
+    \centering
+    \hspace*{\fill}
+    \subcaptionbox{Interpolated pigment reflectances \label{assignment5-pigment}}{\includegraphics[width=0.45\textwidth]{figures/assignment5/assignment5-pigment.png}}%
+    \hspace*{\fill}
+    \subcaptionbox{Relative spectrum power (to wavelength at 560 nm) \label{assignment5-spectrum}}{\includegraphics[width=0.45\textwidth]{figures/assignment5/assignment5-spectrum.png}}%
+    \hspace*{\fill}
+    \caption{Necessary preprocessed data for problem \#1}
+\end{figure}
+
+\subsection{sRGB Coordinate System}
+
+\subsubsection{General Procedure}
+Given a XYZ coordinate $(X,Y,Z)$, its equivalent color in sRGB system $(R_{8bit}, G_{8bit}, B_{8bit})$ is given by
+
+\begin{equation}
+    C_{8bit} = \begin{cases}
+    \text{round}\parens*{255(12.92C')} &,~ C' < 0.031308 \\
+    \text{round}\parens*{255\parens*{1.055C'^{1.0/2.4} - 0.55}} &,~ \text{otherwise}
+    \end{cases}
+\end{equation}
+where $C' \in \{R', G', B'\}$ and
+\begin{equation}
+    \begin{pmatrix}
+        R' \\
+        G' \\
+        B' \\
+    \end{pmatrix} = 
+    \begin{pmatrix}
+        3.2406 &    -1.5372 &   -0.4986 \\
+        -0.9689 &    1.8758 &   0.0415 \\
+        0.0557 &    -0.2040 &   1.0570 \\
+    \end{pmatrix}
+    \begin{pmatrix}
+        X \\
+        Y \\
+        Z \\
+    \end{pmatrix}
+\end{equation}
+    
+We assume that the reflection of a surface, whose reflectance at any wavelength is 100\%, with a D65 incident light is $(255,255,255)$. After performing these calculations, sRGB coordinate for each pigment is given in Figure \ref{assignment5-sRGB}.
+
+\subsubsection{Implementation Detail}
+Unlike the previous problem, the XYZ coordinates do not require any specific preprocessing before applying the mathematical relationships described above.
+
+\begin{figure}[h]
+    \centering
+    \resizebox{0.6\textwidth}{!}{
+        \hspace*{\fill}
+        \subcaptionbox{XYZ coordinate \label{assignment5-xyz}}{\includegraphics[width=0.56\textwidth]{figures/assignment5/assignment5-xyz.png}}%
+        \hspace*{\fill}
+        \subcaptionbox{sRGB coordinate \label{assignment5-sRGB}}{\includegraphics[width=0.34\textwidth]{figures/assignment5/assignment5-sRGB.png}}%
+        \hspace*{\fill}
+    }
+    \caption{Color coordinates in XYZ and sRGB for each pigment}
+\end{figure}
+
+\subsection{Brightest and darkest pigments}
+
+According to the definition of the CIEXYZ color system, the $Y$ direction represents luminous intensity response in bright conditions. Since our incident light is D65, we know from Figure \ref{assignment5-xyz} that the brightest and darkest, i.e. having the highest and lowest $Y$ value, are pigment 46 and 33, respectively. We can verify our conclusion by displaying the color directly as shown in Figure \ref{assignment5-sanity-check}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/assignment5/assignment5-sanity-check.png}
+    \caption{Color from sRGB coordinates of each pixel}
+    \label{assignment5-sanity-check}
+\end{figure}
+
+\bibliographystyle{IEEEtran}
+\bibliography{citation}
+
+\end{document}

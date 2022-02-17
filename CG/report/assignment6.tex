@@ -1,0 +1,56 @@
+\input{style-report}
+\input{math-command}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{hyperref}
+
+\title{Computer Graphics Assignment \#5}
+\begin{document}
+\section{Question}
+\begin{enumerate}
+    \item Define a regular icosahedron whose center is the origin and whose one edge length is 0.8, translate the center to (0,0,-2), and make an animation that it rotates around the vertical axis which passes through the center of the icosahedron. To answer this question, use the same framework of the program and replace the plane to the icosahedron. Put one snapshot on your report and describe how to compile and execute your program.
+    \item Define normal directions on vertices of the icosahedron, and apply diffuse and specular reflection effects on the surface with a point light source as if the surface of the icosahedron is like that of a sphere. The light is expected to be placed at a point that the effect of the reflections expresses efficiently. Parameters of the light and reflections are also expected to be set from the point of easy to understand the reflection effect. If you do not like a complete dark surface at backside from the light, you can adopt ambient light.
+    
+    The equation to calculate the intensities Rrgb is defined as
+    \begin{equation}
+        R_{rgb} = C_{rgb}\parens*{\max \parens*{\frac{{N\cdot{}(-L)}}{{\vert N\vert\vert L\vert}}, 0} + a}
+    \end{equation}
+    where $C_{rgb}$ is the color of the icosahedron, $N$ is the normal vector at a point, $L$ is the vector of an incident light direction and $a$ is a coefficient of ambient light.
+\end{enumerate}
+
+\section{Answer}
+Although there are two separate questions in this assignment, this report address them together by organizing into mathematical procedure followed by implementation details for the sake of readability.
+
+\subsection{General Procedure}
+According to this discussion \cite{assignment6-ico-wikipedia}, the Cartesian coordinates of a regular icosahedron of edge length 2 centered at the origin are given by cyclic permutations of the vertices $(\pm \phi, \pm 1, 0)$ where $\phi = (1+\sqrt{5}) / 2$. Therefore, the coordinates for 12 vertices of a regular icosahedron of edge length 0.8 centered at the origin is given by
+\begin{equation}
+    (x,y,z) = 0.4 \times (\pm \phi, \pm 1, 0)
+\end{equation}
+
+From these coordinates, we can systematically construct 20 triangles that define the icosahedron by finding sets of three vertices such that all pairwise distance is 2. Mathematically, let $P(i)$ denotes the coordinate of $i$-th vertex, a set of all triangles $V$ is defined as
+\begin{equation}
+    V = \cbracket*{v = \{v_1, v_2, v_3\} ~|~ \norm{P(v_i) - P(v_j)}_2 = 2 \text{ and } v_i \in \Int_{12} ~\forall i,j \in \{1,2,3\}}
+\end{equation}
+where $\Int_{12} = \Int \text{ mod } 12$.
+
+Next, given a triangle define at vertices $\val[v][][1], \val[v][][2], \val[v][][3]$, we can calculate its normal vector as
+\begin{equation}
+    \hat{\val[n]} = \frac{\val[p][][12] \times \val[p][][23]}{\norm{\val[p][][12] \times \val[p][][23]}_2}
+\end{equation}
+where $\val[p][][ij] = \val[v][][j] - \val[v][][i]$. We can check whether $\hat{\val[n]}$ is outward or inward by calculating $\val[v][][1] \cdot \hat{\val[n]}$. Specifically, the normal vector is inward is the result is greater than zero. In that case, we simply revert the direction of the normal vector and swap the order of vertices in the triangle when implementing in OpenGL. Finally, based on faces' normal vectors, we can construct normal vector at vertices by averaging normal vectors of their respective adjacent triangles.
+
+\subsection{Implementation Details}
+
+All vertex data, e.g. vertex coordinates, their normal vectors, and polygons they defined, are calculated in a separate \href{https://colab.research.google.com/drive/1Zi5pTD5Ymx8GxWOKJdblQa6rGU8Tv0q7?usp=sharing}{\underline{jupyter notebook}}. However, when actually implement the program using OpenGL, the source codes fail to produce the desired icosahedron for some unknown reasons. Consequently, I cannot proceed to answer the second question. I also included my incomplete implementation as well.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/assignment6/cg6-snapshot.png}
+    \caption{A snapshot of the animation window}
+    \label{cg6-snapshot}
+\end{figure}
+
+\bibliographystyle{IEEEtran}
+\bibliography{citation-assignment6}
+
+\end{document}

@@ -1,0 +1,67 @@
+\input{style-report}
+\input{math-command}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{tikz}
+\title{Computer Graphics Assignment \#3}
+\begin{document}
+\section{Question}
+\begin{enumerate}
+    \item Explain the aliasing problem caused by discretization with an image prepared by yourself.
+    \begin{itemize}
+        \item Prepare one image whose size is $512 \times 512$.
+        \item Using ``SignalFreq'' program, produce an image that has aliased texture with resampling.
+        \item Explain the Nyquist frequency in the case of the resampling.
+    \end{itemize}
+    \item Explain one anti-aliasing technique to remove the alias on the image produced in the above.
+    \begin{itemize}
+        \item Design an appropriate filter and describe it by equations in signal and frequency domains.
+        \item Explain the procedure of the anti-aliasing, which uses the filter.
+        \item Explain the reason why the aliasing is removed by the procedure.
+    \end{itemize}
+\end{enumerate}
+In both answers, include efficient images or graphs to help the understanding of the explanations.
+
+\section{Answer}
+\subsection{Aliasing and Nyquist Frequency}
+Given the delta function series $\delta_T (x)$, the fourier transform of the discrete sampling function $f_s(x)$ can be derived by Convolution theorem:
+\begin{align}
+\fourier{f_s(x)}
+&= \sint[-\infty][\infty] f(x)\delta_T(x) e^{-i\omega x} \dx \\
+&= F(\omega) \ast \fourier{\ssum[n][-\infty][\infty] \delta(t-nT)} \\
+&= f^* \ssum[n][-\infty][\infty] F(\omega - nf^*) \label{result}
+\end{align}
+where $f^* = 1 / T$ denotes the Nyquist frequency. 
+
+From equation \eqref{result}, we can observe that if $F(\omega) > 0$ when $\omega > f^* / 2$, each copy of $F$ will overlap with each other. This situation leads to a phenomenon called \tit{aliasing}, where we cannot distinguish low-frequency components from high-frequency ones due to overlapping in the frequency domain. For example, consider an image with its frequency domain representation as shown in Figure \ref{original}. When we increase sampling interval (or equivalently reduce sampling rate $f^*$), aliasing happens as illustrated in Figure \ref{aliasing}, especially on the roof tiles below the nameplate of the station.
+
+\begin{figure}[h]
+    \centering
+    \hspace*{\fill}
+    \subcaptionbox{An original $512 \times 512$ image with its frequency domain representation \label{original}}{\includegraphics[width=0.45\textwidth]{figures/assignment3/cg3-original.png}}%
+    \hspace*{\fill}
+    \subcaptionbox{Aliasing happens with a lower Nyquist frequency $f^*$
+    \label{aliasing}}{\includegraphics[width=0.45\textwidth]{figures/assignment3/cg3-aliasing.png}}%
+    \hspace*{\fill}
+    \caption{Relationship between aliasing effect and Nyquist frequency}
+\end{figure}
+
+\subsection{Anti-aliasing}
+Suppose that the sampling rate is fixed, we can design a low-pass filter to remove the aliasing on the image. For example, we can use a Gaussian filter \eqref{gaussian-signal} and \eqref{gaussian-frequency} to smooth the image, assuming that $\sigma_x = \sigma_y = \sigma$.
+\begin{subequations}
+    \begin{gather}
+        G(x,y) = \frac{1}{2\pi\sigma^2}e^{-\frac{x^2 + y^2}{2\sigma^2}} \label{gaussian-signal} \\
+        \fourier{G(x,y)} = e^{-\frac{\sigma^2}{2}\parens*{\omega_x^2 + \omega_y^2}} \label{gaussian-frequency}
+    \end{gather}
+\end{subequations}
+
+We apply the filter to an image by performing convolution between both of them. Or equivalently, sliding a finite representation of kernel across the image and adding results together in a discretized space. The principle behind this procedure is smoothing and removing high-frequency components from the image. Given that the standard deviation $\sigma$ is chosen appropriately, it is possible to reduce high-frequency components such that $F(\omega) = 0$ when $\omega > f^* / 2$; thus, mitigating the aliasing effect. Figure \ref{gaussian-image} demonstrates the application of the Gaussian filter.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/assignment3/cg3-gaussian.png}
+    \caption{The smoothed image with less aliasing and its frequency domain representation}
+    \label{gaussian-image}
+\end{figure}
+
+\end{document}

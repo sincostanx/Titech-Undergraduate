@@ -1,0 +1,112 @@
+\input{style-report}
+\input{math-command}
+\usepackage{subfiles}
+\usepackage{subcaption}
+\usepackage{tikz}
+\title{Computer Graphics Assignment \#4}
+\begin{document}
+\section{Question}
+There are three cubes, which are the sun, the earth and the moon, in the window of the sample program. However those star motions are different from real motions.
+\begin{enumerate}
+    \item Change the code to animate the stars as real as possible in the sun coordinate system. It means that the sun is fixed, the revolution (round the sun) and rotation of the earth, and the revolution (round the earth) and rotaton of the moon.
+    \item Describe the equations for each stars with a time $t$, where $t = 365$ is corresponding to one year. Capture the animation window and put on your report.
+\end{enumerate}
+In both answers, include efficient images or graphs to help the understanding of the explanations.
+
+\section{Answer}
+
+Suppose that star motions, e.g. earth around sun and moon around earth, are circular on the 2D Cartesian coordinate system centered at the sun, as illustrated in Figure \ref{cg4-diagram}. We further assume the following:
+\begin{enumerate}
+    \item Ratio of distance between stars $d_1:d_2 = 6:3$.
+    \item Ratio of dimension of stars $r_1:r_2:r_3 = 1:0.3:0.06$.
+    \item Period of the earth's circular motion around the sun is 365 days.
+    \item Period of the moon's circular motion around the earth is 27.3 days. Since $365 / 27.3$ is not an integer, the position of the moon at the beginning of each month is slightly shifted from the previous one.
+    \item Ignore earth's rotation and moon's rotation.
+\end{enumerate}
+\subfile{./figures/assignment4/cg4-diagram}
+Based on these assumptions, we can describe the position of each star at time $t \in \Real$ as Equation \eqref{eq-sun}, \eqref{eq-earth} and \eqref{eq-moon}.
+
+\begin{subequations}
+    \begin{gather}
+    \begin{bmatrix}[1.25]
+    x_S(t) \\
+    y_S(t) \\
+    z_S(t) \\
+    1
+    \end{bmatrix} = 
+    \begin{bmatrix}[1.25]
+    1 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 0 \\
+    0 & 0 & 1 & -18 \\
+    0 & 0 & 0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}[1.25]
+    x_O(t) \\
+    y_O(t) \\
+    z_O(t) \\
+    1
+    \end{bmatrix}
+    \label{eq-sun}
+    \\
+    \begin{bmatrix}[1.25]
+    x_E(t) \\
+    y_E(t) \\
+    z_E(t) \\
+    1
+    \end{bmatrix} = 
+    \begin{bmatrix}[1.25]
+    0.3 & 0 & 0 & 0 \\
+    0 & 0.3 & 0 & 0 \\
+    0 & 0 & 0.3 & 0 \\
+    0 & 0 & 0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}[1.25]
+    1 & 0 & 0 & -d_1\cos\parens*{\text{Mod}\parens*{\frac{360}{365}t,360}} \\
+    0 & 1 & 0 & -d_1\sin\parens*{\text{Mod}\parens*{\frac{360}{365}t,360}} \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}[1.25]
+    x_S(t) \\
+    y_S(t) \\
+    z_S(t) \\
+    1
+    \end{bmatrix}
+    \label{eq-earth}
+    \\
+    \begin{bmatrix}[1.25]
+    x_M(t) \\
+    y_M(t) \\
+    z_M(t) \\
+    1
+    \end{bmatrix} = 
+    \begin{bmatrix}[1.25]
+    0.2 & 0 & 0 & 0 \\
+    0 & 0.2 & 0 & 0 \\
+    0 & 0 & 0.2 & 0 \\
+    0 & 0 & 0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}[1.25]
+    1 & 0 & 0 & -d_1\cos\parens*{\text{Mod}\parens*{\frac{360}{27.3}t,360}} \\
+    0 & 1 & 0 & -d_1\sin\parens*{\text{Mod}\parens*{\frac{360}{27.3}t,360}} \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1
+    \end{bmatrix} 
+    \begin{bmatrix}[1.25]
+    x_E(t) \\
+    y_E(t) \\
+    z_E(t) \\
+    1
+    \end{bmatrix}
+    \label{eq-moon}
+    \end{gather}
+\end{subequations}
+where subscripts $O, S, E, M$ denote coordinates of original cube, Sun, Earth and Moon, respectively. The function $\text{Mod}(x,y) = \text{rad}\parens*{x - y\floor*{\frac{x}{y}}}$ ensures that arguments of sine and cosine function are always in range $[0,2\pi)$. Note that $x_S(t), y_S(t), z_S(t)$ can be any real number; however, the value in Equation \eqref{eq-sun} is specifically chosen for animation purpose. Figure \ref{cg4-snapshot} shows a snapshot of the animation window displaying the sun-earth-moon system.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/assignment4/cg4-snapshot.png}
+    \caption{A snapshot of the animation window}
+    \label{cg4-snapshot}
+\end{figure}
+
+\end{document}
